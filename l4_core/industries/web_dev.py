@@ -1,12 +1,34 @@
 # l4_core/industries/web_dev.py
 
+"""
+Web Development Industry Preset (L4+)
+-------------------------------------
+Defines the default engines, flows, and pages for Web Dev workspaces.
+
+This preset is:
+  - Stateless
+  - Pure data
+  - Fully compatible with WorkspaceFactory (L4+)
+  - Tuned for frontend frameworks, backend APIs, SEO, UX writing, and design systems
+"""
+
+from __future__ import annotations
 from typing import List, Dict, Any
 
+
+# ============================================================
+# ENGINE PRESETS
+# ============================================================
 
 def get_web_dev_default_engines() -> List[Dict[str, Any]]:
     """
     Default engine preferences for web dev workspaces.
-    Tuned for frontend frameworks, backend APIs, SEO, and UX writing.
+    Tuned for:
+      - frontend frameworks
+      - backend APIs
+      - SEO
+      - UX writing
+      - IR → full-stack pipelines
     """
     return [
         {
@@ -52,83 +74,101 @@ def get_web_dev_default_engines() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FLOW PRESETS
+# ============================================================
+
 def get_web_dev_default_flows() -> List[Dict[str, Any]]:
     """
-    High-level flow templates for web dev workspaces.
-    IR-level definitions; the flow engine will interpret them.
+    High-level IR-driven flow templates for web dev workspaces.
+    These are interpreted by the FlowEngine (L4+).
     """
     return [
         {
             "key": "generate_full_stack_website",
             "label": "Generate Full-Stack Website",
             "description": "Generate Next.js/Vite/React frontend + FastAPI/Node backend from IR.",
-            "steps": [
-                "collect_site_ir",
-                "design_information_architecture",
-                "generate_frontend_components",
-                "generate_backend_routes",
-                "generate_api_schemas",
-                "generate_deployment_files",
-                "generate_readme_and_docs",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_site_ir",
+                    "design_information_architecture",
+                    "generate_frontend_components",
+                    "generate_backend_routes",
+                    "generate_api_schemas",
+                    "generate_deployment_files",
+                    "generate_readme_and_docs",
+                ]
+            },
         },
         {
             "key": "generate_landing_page",
             "label": "Generate Landing Page",
             "description": "Generate a high-converting landing page with copy, layout, and SEO.",
-            "steps": [
-                "collect_brand_ir",
-                "generate_copywriting",
-                "generate_layout_structure",
-                "generate_react_components",
-                "generate_css_or_tailwind",
-                "generate_seo_metadata",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_brand_ir",
+                    "generate_copywriting",
+                    "generate_layout_structure",
+                    "generate_react_components",
+                    "generate_css_or_tailwind",
+                    "generate_seo_metadata",
+                ]
+            },
         },
         {
             "key": "optimize_website",
             "label": "Optimize Website",
             "description": "Analyze performance, SEO, accessibility, and UX; propose improvements.",
-            "steps": [
-                "collect_existing_site_ir",
-                "analyze_performance",
-                "analyze_accessibility",
-                "analyze_seo",
-                "propose_improvements",
-                "generate_diff_and_explanations",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_existing_site_ir",
+                    "analyze_performance",
+                    "analyze_accessibility",
+                    "analyze_seo",
+                    "propose_improvements",
+                    "generate_diff_and_explanations",
+                ]
+            },
         },
         {
             "key": "generate_design_system",
             "label": "Generate Design System",
             "description": "Generate a reusable design system with tokens, components, and docs.",
-            "steps": [
-                "collect_brand_ir",
-                "generate_design_tokens",
-                "generate_component_library",
-                "generate_usage_guidelines",
-                "generate_docs_and_examples",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_brand_ir",
+                    "generate_design_tokens",
+                    "generate_component_library",
+                    "generate_usage_guidelines",
+                    "generate_docs_and_examples",
+                ]
+            },
         },
         {
             "key": "generate_cms_site",
             "label": "Generate CMS Site",
             "description": "Generate a CMS-backed site (Sanity, Strapi, Contentful) from IR.",
-            "steps": [
-                "collect_cms_ir",
-                "generate_cms_schema",
-                "generate_frontend_pages",
-                "generate_api_integration",
-                "generate_editor_guidelines",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_cms_ir",
+                    "generate_cms_schema",
+                    "generate_frontend_pages",
+                    "generate_api_integration",
+                    "generate_editor_guidelines",
+                ]
+            },
         },
     ]
 
 
+# ============================================================
+# PAGE PRESETS
+# ============================================================
+
 def get_web_dev_default_pages() -> List[Dict[str, Any]]:
     """
     Default UI pages for a web dev workspace.
-    Page IRs; the page engine will render them.
+    These are IR-level page definitions consumed by the PageEngine (L4+).
     """
     return [
         {
@@ -182,15 +222,23 @@ def get_web_dev_default_pages() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FULL PRESET
+# ============================================================
+
 def get_web_dev_workspace_preset() -> Dict[str, Any]:
     """
     Single entrypoint: everything needed to initialize a web dev workspace.
-    Stateless, pure, safe to call from workspace creation logic.
+    Fully compatible with WorkspaceFactory (L4+).
     """
     return {
         "type": "web_dev",
         "label": "Web Development",
-        "default_engines": get_web_dev_default_engines(),
-        "default_flows": get_web_dev_default_flows(),
-        "default_pages": get_web_dev_default_pages(),
+        "engines": get_web_dev_default_engines(),
+        "flows": get_web_dev_default_flows(),
+        "pages": get_web_dev_default_pages(),
+        "version": 1,
     }
+
+
+WEB_DEV_PRESET = get_web_dev_workspace_preset()

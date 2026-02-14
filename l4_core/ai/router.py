@@ -1,25 +1,72 @@
 # l4_core/ai/router.py
 
+"""
+AIRouter (L4+)
+--------------
+Central AI router responsible for:
+  - Selecting the best engine (AIEngine)
+  - Respecting provider enable/disable switches
+  - Dispatching to provider adapters via PROVIDER_REGISTRY
+  - Propagating trace IDs
+  - Logging structured events
+  - Future-proof for:
+      • scoring
+      • fallback chains
+      • multimodal requests
+      • cost/performance optimization
+"""
+
+from __future__ import annotations
+
 from typing import Optional, List, Dict, Any
 
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..db import AIEngine
-from ..utils.logging import log_engine_event, generate_trace_id
-
-# Provider dispatch imports
-from .providers import (
-    call_openai,
-    call_deepseek,
-    call_anthropic,
-    call_gemini,
-    call_internal_model,
-)
+from l4_core.db.core import get_db
+from l4_core.db.models import AIEngine
+from l4_core.utils.logging import log_engine_event, generate_trace_id
+from l4_core.ai.providers import PROVIDER_REGISTRY
 
 
+# ---------------------------------------------------------
+# FASTAPI ROUTER (required for app startup)
+# ---------------------------------------------------------
+router = APIRouter()
+
+@router.get("/engines")
+async def list_engines(db=Depends(get_db)):
+    """
+    Temporary placeholder endpoint so the app boots.
+    Replace with real AI orchestration endpoints later.
+    """
+    stmt = select(AIEngine).order_by(AIEngine.priority.asc())
+    result = await db.execute(stmt)
+    engines = result.scalars().all()
+
+    return {
+        "status": "ok",
+        "count": len(engines),
+        "engines": [
+            {
+                "id": e.id,
+                "provider": e.provider,
+                "model": e.model,
+                "label": e.label,
+                "enabled": e.enabled,
+                "priority": e.priority,
+            }
+            for e in engines
+        ],
+    }
+
+
+# ---------------------------------------------------------
+# REQUEST / RESPONSE TYPES
+# ---------------------------------------------------------
 class AIRequest:
-    """Generic AI request object for text (and future multimodal)."""
+    """Normalized AI request object."""
 
     def __init__(
         self,
@@ -37,7 +84,7 @@ class AIRequest:
 
 
 class AIResponse:
-    """Generic AI response wrapper."""
+    """Normalized AI response wrapper."""
 
     def __init__(
         self,
@@ -54,17 +101,41 @@ class AIResponse:
         self.raw = raw or {}
 
 
+# ---------------------------------------------------------
+# AIRouter (L4+)
+# ---------------------------------------------------------
 class AIRouter:
     """
     Central AI router.
     - Chooses engine based on DB config (AIEngine)
-    - Respects enabled/priority/fallback
-    - Dispatches to OpenAI, DeepSeek, Claude, Gemini, or your own models.
+    - Applies provider enable/disable overrides
+    - Dispatches to provider adapters via PROVIDER_REGISTRY
+    - Emits structured logs
+    - Propagates trace IDs
     """
 
     def __init__(self, db: AsyncSession):
         self.db = db
 
+        # Provider kill-switches
+        self.provider_overrides = {
+            "openai": True,
+            "deepseek": True,
+            "anthropic": True,
+            "gemini": True,
+            "internal": True,
+        }
+
+    # ---------------------------------------------------------
+    # PUBLIC: ENABLE/DISABLE PROVIDERS
+    # ---------------------------------------------------------
+    def set_provider_enabled(self, provider: str, enabled: bool):
+        if provider in self.provider_overrides:
+            self.provider_overrides[provider] = enabled
+
+    # ---------------------------------------------------------
+    # INTERNAL: GET AVAILABLE ENGINES
+    # ---------------------------------------------------------
     async def _get_available_engines(self) -> List[AIEngine]:
         stmt = (
             select(AIEngine)
@@ -72,20 +143,46 @@ class AIRouter:
             .order_by(AIEngine.priority.asc())
         )
         result = await self.db.execute(stmt)
-        return list(result.scalars().all())
+        engines = list(result.scalars().all())
 
+        # Apply provider overrides
+        engines = [
+            e for e in engines
+            if self.provider_overrides.get(e.provider, True)
+        ]
+
+        # Fallback to internal if everything else is disabled
+        if not engines:
+            stmt = (
+                select(AIEngine)
+                .where(
+                    AIEngine.enabled == True,  # noqa: E712
+                    AIEngine.provider == "internal",
+                )
+                .order_by(AIEngine.priority.asc())
+            )
+            result = await self.db.execute(stmt)
+            engines = list(result.scalars().all())
+
+        return engines
+
+    # ---------------------------------------------------------
+    # INTERNAL: CHOOSE ENGINE
+    # ---------------------------------------------------------
     async def _choose_engine(self) -> Optional[AIEngine]:
         engines = await self._get_available_engines()
         return engines[0] if engines else None
 
-    async def generate_text(self, request: AIRequest) -> AIResponse:
-        """
-        Main text generation entrypoint.
-        - Picks engine
-        - Calls provider-specific implementation
-        - Logs events with trace_id
-        """
-        trace_id = generate_trace_id()
+    # ---------------------------------------------------------
+    # PUBLIC: TEXT GENERATION
+    # ---------------------------------------------------------
+    async def generate_text(
+        self,
+        request: AIRequest,
+        trace_id: Optional[str] = None,
+    ) -> AIResponse:
+
+        trace_id = trace_id or generate_trace_id()
         engine = await self._choose_engine()
 
         if not engine:
@@ -106,19 +203,30 @@ class AIRouter:
             extra={"request_meta": request.metadata},
         )
 
-        # Provider dispatch
-        if engine.provider == "openai":
-            content, raw = await call_openai(request, engine.model)
-        elif engine.provider == "deepseek":
-            content, raw = await call_deepseek(request, engine.model)
-        elif engine.provider == "anthropic":
-            content, raw = await call_anthropic(request, engine.model)
-        elif engine.provider == "gemini":
-            content, raw = await call_gemini(request, engine.model)
-        elif engine.provider == "internal":
-            content, raw = await call_internal_model(request, engine.model)
-        else:
+        # Provider lookup via registry
+        provider_fn = PROVIDER_REGISTRY.get(engine.provider)
+        if not provider_fn:
             raise RuntimeError(f"Unknown AI provider: {engine.provider}")
+
+        # Normalize request into provider payload
+        provider_payload = {
+            "prompt": request.prompt,
+            "system_prompt": request.system_prompt,
+            "max_tokens": request.max_tokens,
+            "temperature": request.temperature,
+            "metadata": request.metadata,
+        }
+
+        # Call provider adapter
+        provider_result = await provider_fn(
+            request=provider_payload,
+            model=engine.model,
+            trace_id=trace_id,
+        )
+
+        # Provider result is already structured
+        content = provider_result.get("output_text", "")
+        raw = provider_result.get("raw", {})
 
         log_engine_event(
             engine=engine_key,
@@ -134,43 +242,3 @@ class AIRouter:
             trace_id=trace_id,
             raw=raw,
         )
-
-    async def generate_image(self, request: AIRequest) -> AIResponse:
-        """
-        Placeholder for image generation.
-        Will route to internal-only engines for AAA asset pipelines.
-        """
-        trace_id = generate_trace_id()
-        log_engine_event(
-            engine="image-router",
-            message="Image generation requested (not yet implemented)",
-            trace_id=trace_id,
-            extra={"request_meta": request.metadata},
-        )
-        raise NotImplementedError("Image generation not implemented yet.")
-
-    async def generate_audio(self, request: AIRequest) -> AIResponse:
-        """
-        Placeholder for voice line generation for AAA titles.
-        """
-        trace_id = generate_trace_id()
-        log_engine_event(
-            engine="audio-router",
-            message="Audio generation requested (not yet implemented)",
-            trace_id=trace_id,
-            extra={"request_meta": request.metadata},
-        )
-        raise NotImplementedError("Audio generation not implemented yet.")
-
-    async def generate_video(self, request: AIRequest) -> AIResponse:
-        """
-        Placeholder for video/cinematic generation orchestration.
-        """
-        trace_id = generate_trace_id()
-        log_engine_event(
-            engine="video-router",
-            message="Video generation requested (not yet implemented)",
-            trace_id=trace_id,
-            extra={"request_meta": request.metadata},
-        )
-        raise NotImplementedError("Video generation not implemented yet.")

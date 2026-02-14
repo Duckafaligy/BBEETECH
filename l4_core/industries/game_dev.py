@@ -1,12 +1,33 @@
 # l4_core/industries/game_dev.py
 
+"""
+Game Development Industry Preset (L4+)
+--------------------------------------
+Defines the default engines, flows, and pages for Game Dev workspaces.
+
+This preset is:
+  - Stateless
+  - Pure data
+  - Fully compatible with WorkspaceFactory (L4+)
+  - Tuned for systems design, gameplay code, tooling, and level IR
+"""
+
+from __future__ import annotations
 from typing import List, Dict, Any
 
+
+# ============================================================
+# ENGINE PRESETS
+# ============================================================
 
 def get_game_dev_default_engines() -> List[Dict[str, Any]]:
     """
     Default engine preferences for game dev workspaces.
-    Tuned for systems design, gameplay code, and tool scripting.
+    Tuned for:
+      - gameplay systems
+      - engine/tooling code
+      - design reasoning
+      - multimodal art/design IR
     """
     return [
         {
@@ -52,89 +73,109 @@ def get_game_dev_default_engines() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FLOW PRESETS
+# ============================================================
+
 def get_game_dev_default_flows() -> List[Dict[str, Any]]:
     """
-    High-level flow templates for game dev workspaces.
-    These are IR-level definitions; the flow engine will interpret them.
+    High-level IR-driven flow templates for game dev workspaces.
+    These are interpreted by the FlowEngine (L4+).
     """
     return [
         {
             "key": "design_mechanic",
             "label": "Design Game Mechanic",
             "description": "From IR, design a mechanic with rules, edge cases, and tuning parameters.",
-            "steps": [
-                "collect_mechanic_ir",
-                "define_rules_and_states",
-                "define_failure_and_edge_cases",
-                "define_tuning_parameters",
-                "generate_design_doc",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_mechanic_ir",
+                    "define_rules_and_states",
+                    "define_failure_and_edge_cases",
+                    "define_tuning_parameters",
+                    "generate_design_doc",
+                ]
+            },
         },
         {
             "key": "implement_mechanic_unreal",
             "label": "Implement Mechanic (Unreal)",
             "description": "Generate Unreal C++/Blueprint code and integration notes for a mechanic.",
-            "steps": [
-                "analyze_mechanic_ir",
-                "generate_unreal_cpp_or_blueprint",
-                "generate_editor_setup_instructions",
-                "generate_tests_and_debug_tools",
-                "generate_readme_for_integration",
-            ],
+            "definition": {
+                "steps": [
+                    "analyze_mechanic_ir",
+                    "generate_unreal_cpp_or_blueprint",
+                    "generate_editor_setup_instructions",
+                    "generate_tests_and_debug_tools",
+                    "generate_readme_for_integration",
+                ]
+            },
         },
         {
             "key": "implement_mechanic_unity",
             "label": "Implement Mechanic (Unity)",
             "description": "Generate Unity C# scripts and scene integration instructions.",
-            "steps": [
-                "analyze_mechanic_ir",
-                "generate_unity_csharp_scripts",
-                "generate_prefab_and_scene_setup",
-                "generate_tests_and_debug_tools",
-                "generate_readme_for_integration",
-            ],
+            "definition": {
+                "steps": [
+                    "analyze_mechanic_ir",
+                    "generate_unity_csharp_scripts",
+                    "generate_prefab_and_scene_setup",
+                    "generate_tests_and_debug_tools",
+                    "generate_readme_for_integration",
+                ]
+            },
         },
         {
             "key": "generate_tooling",
             "label": "Generate Editor Tooling",
             "description": "Create Unreal/Unity editor tools for designers (menus, inspectors, utilities).",
-            "steps": [
-                "collect_tool_ir",
-                "generate_editor_scripts",
-                "generate_ui_elements",
-                "generate_usage_docs",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_tool_ir",
+                    "generate_editor_scripts",
+                    "generate_ui_elements",
+                    "generate_usage_docs",
+                ]
+            },
         },
         {
             "key": "level_blockout_ir",
             "label": "Level Blockout IR",
             "description": "Define a level in IR: spaces, flows, encounters, pacing.",
-            "steps": [
-                "collect_level_ir",
-                "define_spaces_and_paths",
-                "define_encounters_and_beats",
-                "define_metrics_and_goals",
-                "generate_blockout_spec",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_level_ir",
+                    "define_spaces_and_paths",
+                    "define_encounters_and_beats",
+                    "define_metrics_and_goals",
+                    "generate_blockout_spec",
+                ]
+            },
         },
         {
             "key": "generate_gameplay_docs",
             "label": "Generate Gameplay Docs",
             "description": "Produce GDD-style docs from IR and existing systems.",
-            "steps": [
-                "collect_game_ir",
-                "summarize_existing_systems",
-                "generate_gdd_sections",
-                "generate_open_questions_and_risks",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_game_ir",
+                    "summarize_existing_systems",
+                    "generate_gdd_sections",
+                    "generate_open_questions_and_risks",
+                ]
+            },
         },
     ]
 
 
+# ============================================================
+# PAGE PRESETS
+# ============================================================
+
 def get_game_dev_default_pages() -> List[Dict[str, Any]]:
     """
     Default UI pages for a game dev workspace.
-    These are page IRs; the page engine will render them.
+    These are IR-level page definitions consumed by the PageEngine (L4+).
     """
     return [
         {
@@ -187,15 +228,23 @@ def get_game_dev_default_pages() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FULL PRESET
+# ============================================================
+
 def get_game_dev_workspace_preset() -> Dict[str, Any]:
     """
     Single entrypoint: everything needed to initialize a game dev workspace.
-    Stateless, pure, safe to call from workspace creation logic.
+    Fully compatible with WorkspaceFactory (L4+).
     """
     return {
         "type": "game_dev",
         "label": "Game Development",
-        "default_engines": get_game_dev_default_engines(),
-        "default_flows": get_game_dev_default_flows(),
-        "default_pages": get_game_dev_default_pages(),
+        "engines": get_game_dev_default_engines(),
+        "flows": get_game_dev_default_flows(),
+        "pages": get_game_dev_default_pages(),
+        "version": 1,
     }
+
+
+GAME_DEV_PRESET = get_game_dev_workspace_preset()

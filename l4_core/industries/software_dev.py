@@ -1,12 +1,33 @@
 # l4_core/industries/software_dev.py
 
+"""
+Software Development Industry Preset (L4+)
+------------------------------------------
+Defines the default engines, flows, and pages for Software Dev workspaces.
+
+This preset is:
+  - Stateless
+  - Pure data
+  - Fully compatible with WorkspaceFactory (L4+)
+  - Tuned for backend, frontend, full‑stack, refactoring, and architecture IR
+"""
+
+from __future__ import annotations
 from typing import List, Dict, Any
 
+
+# ============================================================
+# ENGINE PRESETS
+# ============================================================
 
 def get_software_dev_default_engines() -> List[Dict[str, Any]]:
     """
     Default engine preferences for software dev workspaces.
-    These are used to seed AIEngine rows when a workspace of this type is created.
+    Tuned for:
+      - backend generation
+      - frontend generation
+      - refactoring
+      - architecture reasoning
     """
     return [
         {
@@ -44,55 +65,69 @@ def get_software_dev_default_engines() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FLOW PRESETS
+# ============================================================
+
 def get_software_dev_default_flows() -> List[Dict[str, Any]]:
     """
-    High-level flow templates for software dev workspaces.
-    These are IR-level definitions; the flow engine will interpret them.
+    High-level IR-driven flow templates for software dev workspaces.
+    These are interpreted by the FlowEngine (L4+).
     """
     return [
         {
             "key": "generate_backend_service",
             "label": "Generate Backend Service",
-            "description": "Given a spec, generate FastAPI/Express backend modules, routes, and tests.",
-            "steps": [
-                "collect_requirements",
-                "design_api_schema",
-                "generate_code",
-                "generate_tests",
-                "explain_architecture",
-            ],
+            "description": "Generate FastAPI/Express backend modules, routes, and tests.",
+            "definition": {
+                "steps": [
+                    "collect_requirements",
+                    "design_api_schema",
+                    "generate_code",
+                    "generate_tests",
+                    "explain_architecture",
+                ]
+            },
         },
         {
             "key": "refactor_module",
             "label": "Refactor Module",
-            "description": "Refactor an existing code module for clarity, performance, and testability.",
-            "steps": [
-                "analyze_existing_code",
-                "propose_refactor_plan",
-                "apply_refactor",
-                "generate_diff_and_explanation",
-            ],
+            "description": "Refactor an existing module for clarity, performance, and testability.",
+            "definition": {
+                "steps": [
+                    "analyze_existing_code",
+                    "propose_refactor_plan",
+                    "apply_refactor",
+                    "generate_diff_and_explanation",
+                ]
+            },
         },
         {
             "key": "generate_full_stack_app",
             "label": "Generate Full-Stack App",
-            "description": "From IR, generate backend, frontend, and deployment config.",
-            "steps": [
-                "collect_product_ir",
-                "design_data_model",
-                "generate_backend",
-                "generate_frontend",
-                "generate_deployment_files",
-                "generate_readme_and_docs",
-            ],
+            "description": "Generate backend, frontend, and deployment config from IR.",
+            "definition": {
+                "steps": [
+                    "collect_product_ir",
+                    "design_data_model",
+                    "generate_backend",
+                    "generate_frontend",
+                    "generate_deployment_files",
+                    "generate_readme_and_docs",
+                ]
+            },
         },
     ]
 
 
+# ============================================================
+# PAGE PRESETS
+# ============================================================
+
 def get_software_dev_default_pages() -> List[Dict[str, Any]]:
     """
     Default UI pages for a software dev workspace.
-    These are page IRs; the page engine will render them.
+    These are IR-level page definitions consumed by the PageEngine (L4+).
     """
     return [
         {
@@ -124,15 +159,23 @@ def get_software_dev_default_pages() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FULL PRESET
+# ============================================================
+
 def get_software_dev_workspace_preset() -> Dict[str, Any]:
     """
     Single entrypoint: everything needed to initialize a software dev workspace.
-    Stateless, pure, safe to call from workspace creation logic.
+    Fully compatible with WorkspaceFactory (L4+).
     """
     return {
         "type": "software_dev",
         "label": "Software Development",
-        "default_engines": get_software_dev_default_engines(),
-        "default_flows": get_software_dev_default_flows(),
-        "default_pages": get_software_dev_default_pages(),
+        "engines": get_software_dev_default_engines(),
+        "flows": get_software_dev_default_flows(),
+        "pages": get_software_dev_default_pages(),
+        "version": 1,
     }
+
+
+SOFTWARE_DEV_PRESET = get_software_dev_workspace_preset()

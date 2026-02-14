@@ -1,12 +1,33 @@
 # l4_core/industries/physics_sim.py
 
+"""
+Physics Simulation Industry Preset (L4+)
+----------------------------------------
+Defines the default engines, flows, and pages for Physics Simulation workspaces.
+
+This preset is:
+  - Stateless
+  - Pure data
+  - Fully compatible with WorkspaceFactory (L4+)
+  - Tuned for math, numerical methods, simulation code, and multi-level explanations
+"""
+
+from __future__ import annotations
 from typing import List, Dict, Any
 
+
+# ============================================================
+# ENGINE PRESETS
+# ============================================================
 
 def get_physics_sim_default_engines() -> List[Dict[str, Any]]:
     """
     Default engine preferences for physics simulation workspaces.
-    Tuned for math, code, and explanation.
+    Tuned for:
+      - mathematical modeling
+      - numerical simulation
+      - scientific explanation
+      - IR → code pipelines
     """
     return [
         {
@@ -44,79 +65,97 @@ def get_physics_sim_default_engines() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FLOW PRESETS
+# ============================================================
+
 def get_physics_sim_default_flows() -> List[Dict[str, Any]]:
     """
-    High-level flow templates for physics simulation workspaces.
-    IR-level definitions; the flow engine will interpret them.
+    High-level IR-driven flow templates for physics simulation workspaces.
+    These are interpreted by the FlowEngine (L4+).
     """
     return [
         {
             "key": "design_simulation",
             "label": "Design Simulation",
-            "description": "From IR, define the system, variables, forces, and outputs.",
-            "steps": [
-                "collect_sim_ir",
-                "define_state_variables",
-                "define_forces_and_equations",
-                "define_initial_conditions",
-                "define_observables_and_outputs",
-                "generate_simulation_spec",
-            ],
+            "description": "Define the system, variables, forces, and outputs.",
+            "definition": {
+                "steps": [
+                    "collect_sim_ir",
+                    "define_state_variables",
+                    "define_forces_and_equations",
+                    "define_initial_conditions",
+                    "define_observables_and_outputs",
+                    "generate_simulation_spec",
+                ]
+            },
         },
         {
             "key": "generate_python_simulation",
             "label": "Generate Python Simulation",
-            "description": "Generate Python code for the simulation using numpy/scipy or pure math.",
-            "steps": [
-                "analyze_simulation_spec",
-                "choose_numerical_method",
-                "generate_simulation_code",
-                "generate_run_script",
-                "generate_plotting_code",
-                "generate_readme_and_usage",
-            ],
+            "description": "Generate Python code using numpy/scipy or pure math.",
+            "definition": {
+                "steps": [
+                    "analyze_simulation_spec",
+                    "choose_numerical_method",
+                    "generate_simulation_code",
+                    "generate_run_script",
+                    "generate_plotting_code",
+                    "generate_readme_and_usage",
+                ]
+            },
         },
         {
             "key": "analyze_results",
             "label": "Analyze Results",
-            "description": "Given simulation outputs, analyze behavior and summarize insights.",
-            "steps": [
-                "collect_simulation_output",
-                "compute_key_metrics",
-                "detect_patterns_or_anomalies",
-                "generate_summary_and_plots_ir",
-            ],
+            "description": "Analyze simulation outputs and summarize insights.",
+            "definition": {
+                "steps": [
+                    "collect_simulation_output",
+                    "compute_key_metrics",
+                    "detect_patterns_or_anomalies",
+                    "generate_summary_and_plots_ir",
+                ]
+            },
         },
         {
             "key": "generate_visualization_ir",
             "label": "Generate Visualization IR",
-            "description": "Define how to visualize the simulation in 2D/3D for the frontend.",
-            "steps": [
-                "collect_simulation_spec",
-                "define_visual_entities",
-                "define_time_mapping",
-                "define_camera_or_view",
-                "generate_visualization_ir",
-            ],
+            "description": "Define how to visualize the simulation in 2D/3D.",
+            "definition": {
+                "steps": [
+                    "collect_simulation_spec",
+                    "define_visual_entities",
+                    "define_time_mapping",
+                    "define_camera_or_view",
+                    "generate_visualization_ir",
+                ]
+            },
         },
         {
             "key": "explain_simulation",
             "label": "Explain Simulation",
             "description": "Explain the math, code, and behavior at multiple levels.",
-            "steps": [
-                "collect_simulation_code",
-                "generate_beginner_explanation",
-                "generate_intermediate_explanation",
-                "generate_expert_explanation",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_simulation_code",
+                    "generate_beginner_explanation",
+                    "generate_intermediate_explanation",
+                    "generate_expert_explanation",
+                ]
+            },
         },
     ]
 
 
+# ============================================================
+# PAGE PRESETS
+# ============================================================
+
 def get_physics_sim_default_pages() -> List[Dict[str, Any]]:
     """
     Default UI pages for a physics simulation workspace.
-    Page IRs; the page engine will render them.
+    These are IR-level page definitions consumed by the PageEngine (L4+).
     """
     return [
         {
@@ -168,15 +207,23 @@ def get_physics_sim_default_pages() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FULL PRESET
+# ============================================================
+
 def get_physics_sim_workspace_preset() -> Dict[str, Any]:
     """
     Single entrypoint: everything needed to initialize a physics simulation workspace.
-    Stateless, pure, safe to call from workspace creation logic.
+    Fully compatible with WorkspaceFactory (L4+).
     """
     return {
         "type": "physics_sim",
         "label": "Physics Simulation",
-        "default_engines": get_physics_sim_default_engines(),
-        "default_flows": get_physics_sim_default_flows(),
-        "default_pages": get_physics_sim_default_pages(),
+        "engines": get_physics_sim_default_engines(),
+        "flows": get_physics_sim_default_flows(),
+        "pages": get_physics_sim_default_pages(),
+        "version": 1,
     }
+
+
+PHYSICS_SIM_PRESET = get_physics_sim_workspace_preset()

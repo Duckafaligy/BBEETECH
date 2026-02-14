@@ -1,12 +1,34 @@
 # l4_core/industries/app_dev.py
 
+"""
+App Development Industry Preset (L4+)
+-------------------------------------
+Defines the default engines, flows, and pages for App Dev workspaces.
+
+This preset is:
+  - Stateless
+  - Pure data
+  - Safe to import anywhere
+  - Fully compatible with WorkspaceFactory (L4+)
+  - Future-proof for IR-level flows, multimodal UX, and codegen pipelines
+"""
+
+from __future__ import annotations
 from typing import List, Dict, Any
 
+
+# ============================================================
+# ENGINE PRESETS
+# ============================================================
 
 def get_app_dev_default_engines() -> List[Dict[str, Any]]:
     """
     Default engine preferences for app dev workspaces.
-    Tuned for product flows, mobile/desktop apps, and UX-heavy logic.
+    Tuned for:
+      - product flows
+      - mobile/desktop app generation
+      - UX-heavy reasoning
+      - IR → UI mapping
     """
     return [
         {
@@ -52,79 +74,97 @@ def get_app_dev_default_engines() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FLOW PRESETS
+# ============================================================
+
 def get_app_dev_default_flows() -> List[Dict[str, Any]]:
     """
-    High-level flow templates for app dev workspaces.
-    IR-level definitions; the flow engine will interpret them.
+    High-level IR-driven flow templates for app dev workspaces.
+    These are interpreted by the FlowEngine (L4+).
     """
     return [
         {
             "key": "design_app_flow",
             "label": "Design App Flow",
             "description": "From IR, design screens, navigation, and user journeys.",
-            "steps": [
-                "collect_app_ir",
-                "define_user_personas",
-                "define_screens_and_states",
-                "define_navigation_and_edges",
-                "generate_flow_diagram_ir",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_app_ir",
+                    "define_user_personas",
+                    "define_screens_and_states",
+                    "define_navigation_and_edges",
+                    "generate_flow_diagram_ir",
+                ]
+            },
         },
         {
             "key": "generate_mobile_app",
             "label": "Generate Mobile App",
             "description": "Generate React Native/Flutter/Swift/Kotlin code from IR.",
-            "steps": [
-                "collect_platform_preferences",
-                "generate_data_model",
-                "generate_app_screens",
-                "generate_navigation_code",
-                "generate_api_integration",
-                "generate_readme_and_setup",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_platform_preferences",
+                    "generate_data_model",
+                    "generate_app_screens",
+                    "generate_navigation_code",
+                    "generate_api_integration",
+                    "generate_readme_and_setup",
+                ]
+            },
         },
         {
             "key": "generate_desktop_app",
             "label": "Generate Desktop App",
             "description": "Generate Electron/Tauri/native desktop app from IR.",
-            "steps": [
-                "collect_app_ir",
-                "generate_window_and_menu_structure",
-                "generate_core_logic",
-                "generate_persistence_layer",
-                "generate_build_and_packaging_files",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_app_ir",
+                    "generate_window_and_menu_structure",
+                    "generate_core_logic",
+                    "generate_persistence_layer",
+                    "generate_build_and_packaging_files",
+                ]
+            },
         },
         {
             "key": "optimize_app_experience",
             "label": "Optimize App Experience",
             "description": "Analyze flows and suggest UX, performance, and accessibility improvements.",
-            "steps": [
-                "collect_existing_flows",
-                "analyze_pain_points",
-                "propose_improvements",
-                "generate_diff_and_explanations",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_existing_flows",
+                    "analyze_pain_points",
+                    "propose_improvements",
+                    "generate_diff_and_explanations",
+                ]
+            },
         },
         {
             "key": "generate_app_docs",
             "label": "Generate App Docs",
             "description": "Produce user guides, onboarding flows, and release notes.",
-            "steps": [
-                "collect_app_ir",
-                "summarize_features",
-                "generate_user_guide",
-                "generate_onboarding_copy",
-                "generate_release_notes_template",
-            ],
+            "definition": {
+                "steps": [
+                    "collect_app_ir",
+                    "summarize_features",
+                    "generate_user_guide",
+                    "generate_onboarding_copy",
+                    "generate_release_notes_template",
+                ]
+            },
         },
     ]
 
 
+# ============================================================
+# PAGE PRESETS
+# ============================================================
+
 def get_app_dev_default_pages() -> List[Dict[str, Any]]:
     """
     Default UI pages for an app dev workspace.
-    Page IRs; the page engine will render them.
+    These are IR-level page definitions consumed by the PageEngine (L4+).
     """
     return [
         {
@@ -176,15 +216,23 @@ def get_app_dev_default_pages() -> List[Dict[str, Any]]:
     ]
 
 
+# ============================================================
+# FULL PRESET
+# ============================================================
+
 def get_app_dev_workspace_preset() -> Dict[str, Any]:
     """
     Single entrypoint: everything needed to initialize an app dev workspace.
-    Stateless, pure, safe to call from workspace creation logic.
+    Fully compatible with WorkspaceFactory (L4+).
     """
     return {
         "type": "app_dev",
         "label": "App Development",
-        "default_engines": get_app_dev_default_engines(),
-        "default_flows": get_app_dev_default_flows(),
-        "default_pages": get_app_dev_default_pages(),
+        "engines": get_app_dev_default_engines(),
+        "flows": get_app_dev_default_flows(),
+        "pages": get_app_dev_default_pages(),
+        "version": 1,
     }
+
+
+APP_DEV_PRESET = get_app_dev_workspace_preset()
